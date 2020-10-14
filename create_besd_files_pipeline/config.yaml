@@ -1,0 +1,17 @@
+samples:
+  #CARDIOGENICS_MC.chrall.CPRA_b37:
+  #CARDIOGENICS_MP.chrall.CPRA_b37: 
+  #MESA_AFA_MC.chrall.CPRA_b37:
+  #MESA_HIS_MC.chrall.CPRA_b37:
+  #MESA_CAU_MC.chrall.CPRA_b37:
+  #STARNET_MP.chrall.CPRA_b37:
+  #STARNET_FC.chrall.CPRA_b37:
+  #Fairfax2014_MC.chrall.CPRA_b37:
+  #Fairfax2014_MC_IFNG_24h.chrall.CPRA_b37:
+  #Fairfax2014_MC_LPS_24h.chrall.CPRA_b37:
+  #Fairfax2014_MC_LPS_2h.chrall.CPRA_b37:
+  #PsychENCODE_BRAIN.chrall.CPRA_b37:
+  #ROSMAP_BRAIN.chrall.CPRA_b37:
+  #COGA-INIA_BRAIN.chrall.CPRA_b37:
+  CARDIOGENICS_MP.male.chrall.CPRA_b37:
+  CARDIOGENICS_MP.female.chrall.CPRA_b37:

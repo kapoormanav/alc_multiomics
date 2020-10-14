@@ -1,0 +1,40 @@
+CHRS = range(1,23)
+configfile: "config.yaml"
+rule all:
+    input:
+        expand("{sample}.{chrom}.besd", sample=config["samples"], chrom = CHRS),
+rule extract:
+     input: "/sc/arion/projects/LOAD/Papers/2018-08-22.AD.myeloid/sumstats.eqtl/output/{sample}.tsv.gz"
+     output: temp("{sample}.{chrom}.v1.tsv")
+     params: chr = "{chrom}"
+     shell: """zcat {input} | awk 'FNR > 8 && $2=={params.chr} {{print  $1,$2,$3,$5,$4,$6,$7,$2,"NA",$7,"N",$8,$9,$11 }}' | awk '$6 >= 0.01 && $6 <=0.99' > {output}"""
+rule join:
+    input: "grch37_ensembl_95.transcript_gencode_basic.protein_coding.illumina_humanref_8_v3.ranges.by_probe.tsv", 
+    	   													   "{sample}.{chrom}.v1.tsv"
+    output: temp("{sample}.{chrom}.v2.tsv")
+    threads: 4
+    shell:
+        """awk '
+BEGIN {{print "SNP Chr BP A1 A2 Freq Probe Probe_Chr Probe_bp Gene Orientation b se p"}};
+NR==FNR {{
+rs[$6]=1;st[$6]=$2;end[$6]=$3;gene[$6]=$6;
+next
+}} 
+{{
+if (rs[$7]==1) 
+print $1,$2,$3,$4,$5,$6,$7,$8,st[$7],$10,$11,$12,$13,$14 ;
+}}' {input} > {output}"""
+
+rule uniq:
+    input:  "{sample}.{chrom}.v2.tsv"
+    output: temp("{sample}.{chrom}.v3.tsv")
+    threads: 4
+    shell: """awk '!a[$1,$7]++' {input} | sed 's/,/:/g' > {output}"""
+
+rule smr:
+     input: "{sample}.{chrom}.v3.tsv"
+     output: "{sample}.{chrom}.besd"
+     threads: 4
+     params: out = "{sample}.{chrom}"
+     shell: """ module load plink
+     smr_Linux --qfile {input} --make-besd-dense --out {params.out} --thread-num 4 """
