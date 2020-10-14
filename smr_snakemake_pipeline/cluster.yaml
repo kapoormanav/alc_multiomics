@@ -1,0 +1,20 @@
+__default__:
+  project: acc_LOAD
+  partition: bode
+  queue: premium
+  cores: 8
+  mem: 18000
+  one_host: span[ptile=4]
+  time: '05:58'
+  name: $(basename $(pwd)):{rule}:{wildcards}
+  output: logs/{rule}:{wildcards}.stdout
+  error: logs/{rule}:{wildcards}.stderr
+
+runSMR:
+  time: '03:58'
+  cores: 8
+  mem: 18000
+combine:
+  time: '30:00'
+  cores: 4
+  mem: 7000

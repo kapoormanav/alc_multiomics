@@ -1,0 +1,28 @@
+
+#SAMPLES = ["CARDIOGENICS_MC.chrall.CPRA_b37", "CARDIOGENICS_MP.chrall.CPRA_b37"]
+configfile: "config.yaml"
+gwas = config["GWAS"]
+chr = range(1,23) #config["chromo"]
+#comb = expand("{gwas}.{sample}", sample=config["samples"], gwas=config["GWAS"])
+localrules: all, combine
+rule all:
+    input:
+        expand("smr_output/combined_{gwas}.{sample}.smr", gwas=config["GWAS"], sample=config["samples"]),
+
+rule runSMR:
+     output: "smr_output/all_files/{gwas}.{sample}.{chrom}.smr"
+     params: 
+     	     ma = "/sc/arion/projects/COGA/Manav/Manav_6/from_scratch_SMR/alcohol_munged/output/{gwas}.ma",
+	     chrom = "/sc/arion/projects/LOAD/Dado/projects/2018-11-22.ldref.adgc/output/ADGC_2014.chr{chrom}.CPRA_b37",
+	     besd = "/sc/arion/projects/COGA/Manav/Manav_6/from_scratch_SMR/munged_dado/test.snake/{sample}.{chrom}",
+	     out = "smr_output/all_files/{gwas}.{sample}.{chrom}"
+     log:
+        "logs/{gwas}.{sample}.{chrom}.log"
+     threads: 8
+     shell: """ smr_Linux --bfile {params.chrom}  --gwas-summary {params.ma}  --beqtl-summary  {params.besd} --out {params.out} --thread-num 8 --diff-freq-prop 0.1 >> {log} """
+
+rule combine: 
+     input:  expand("smr_output/all_files/{{gwas}}.{{sample}}.{chrom}.smr", chrom=chr)
+     output: "smr_output/combined_{gwas}.{sample}.smr"
+     shell: """ awk 'BEGIN {{print "probeID","ProbeChr","Gene","Probe_bp","topSNP","topSNP_chr","topSNP_bp","A1","A2","Freq","b_GWAS","se_GWAS","p_GWAS","b_eQTL","se_eQTL", "p_eQTL","b_SMR","se_SMR","p_SMR","p_HEIDI","nsnp_HEIDI"}}; FNR > 1' {input} | tr "\\t" " " >> {output} """
+     
